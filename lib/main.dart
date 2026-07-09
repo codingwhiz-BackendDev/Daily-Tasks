@@ -13,41 +13,89 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'TaskFlow',
+      title: 'Daily Task',
       debugShowCheckedModeBanner: false,
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF6750A4),
+          seedColor: const Color(0xFF4F46E5),
           brightness: Brightness.light,
         ),
         useMaterial3: true,
-        cardTheme: CardThemeData(
+        scaffoldBackgroundColor: const Color(0xFFF8FAFC),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
           elevation: 0,
+          centerTitle: true,
+        ),
+        cardTheme: CardThemeData(
+          elevation: 2,
+          shadowColor: Colors.black12,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
           ),
         ),
         floatingActionButtonTheme: FloatingActionButtonThemeData(
+          elevation: 4,
           shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.white,
+          border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: const Color(0xFF4F46E5), width: 2),
           ),
         ),
       ),
       darkTheme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: const Color(0xFF6750A4),
+          seedColor: const Color(0xFF4F46E5),
           brightness: Brightness.dark,
         ),
         useMaterial3: true,
-        cardTheme: CardThemeData(
+        scaffoldBackgroundColor: const Color(0xFF0F172A),
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
           elevation: 0,
+          centerTitle: true,
+        ),
+        cardTheme: CardThemeData(
+          elevation: 2,
+          shadowColor: Colors.black26,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(20),
           ),
         ),
         floatingActionButtonTheme: FloatingActionButtonThemeData(
+          elevation: 4,
           shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: const Color(0xFF1E293B),
+          border: OutlineInputBorder(
             borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide.none,
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(16),
+            borderSide: BorderSide(color: const Color(0xFF818CF8), width: 2),
           ),
         ),
       ),
@@ -198,51 +246,83 @@ class _TodoHomePageState extends State<TodoHomePage> {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('TaskFlow'),
+        title: const Text(
+          'Daily Task',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.transparent,
         actions: [
           if (_tasks.isNotEmpty)
-            PopupMenuButton<String>(
-              icon: const Icon(Icons.more_vert),
-              onSelected: (value) async {
-                if (value == 'clear_completed') {
-                  final service = await TaskStorageService.getInstance();
-                  final completedTasks = _tasks.where((t) => t.isCompleted).toList();
-                  for (var task in completedTasks) {
-                    await service.deleteTask(task.id);
-                  }
-                  await _loadTasks();
-                } else if (value == 'clear_all') {
-                  final service = await TaskStorageService.getInstance();
-                  await service.clearAllTasks();
-                  await _loadTasks();
-                }
-              },
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  value: 'clear_completed',
-                  child: Row(
-                    children: [
-                      Icon(Icons.check_circle_outline),
-                      SizedBox(width: 8),
-                      Text('Clear Completed'),
-                    ],
+            Container(
+              margin: const EdgeInsets.only(right: 8),
+              decoration: BoxDecoration(
+                color: colorScheme.primaryContainer.withOpacity(0.5),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.check_circle_outline,
+                    size: 18,
+                    color: colorScheme.primary,
                   ),
-                ),
-                const PopupMenuItem(
-                  value: 'clear_all',
-                  child: Row(
-                    children: [
-                      Icon(Icons.delete_outline),
-                      SizedBox(width: 8),
-                      Text('Clear All'),
-                    ],
+                  const SizedBox(width: 4),
+                  Text(
+                    '${_tasks.where((t) => t.isCompleted).length}/${_tasks.length}',
+                    style: TextStyle(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
+          PopupMenuButton<String>(
+            icon: const Icon(Icons.more_vert),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
+            onSelected: (value) async {
+              if (value == 'clear_completed') {
+                final service = await TaskStorageService.getInstance();
+                final completedTasks = _tasks.where((t) => t.isCompleted).toList();
+                for (var task in completedTasks) {
+                  await service.deleteTask(task.id);
+                }
+                await _loadTasks();
+              } else if (value == 'clear_all') {
+                final service = await TaskStorageService.getInstance();
+                await service.clearAllTasks();
+                await _loadTasks();
+              }
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                value: 'clear_completed',
+                child: Row(
+                  children: [
+                    Icon(Icons.check_circle_outline, size: 20),
+                    const SizedBox(width: 12),
+                    const Text('Clear Completed'),
+                  ],
+                ),
+              ),
+              PopupMenuItem(
+                value: 'clear_all',
+                child: Row(
+                  children: [
+                    Icon(Icons.delete_outline, size: 20),
+                    const SizedBox(width: 12),
+                    const Text('Clear All'),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ],
       ),
       body: _isLoading
@@ -252,9 +332,11 @@ class _TodoHomePageState extends State<TodoHomePage> {
               : _buildTaskList(theme, colorScheme),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: _showAddTaskDialog,
-        icon: const Icon(Icons.add),
+        icon: const Icon(Icons.add_rounded),
         label: const Text('Add Task'),
-        elevation: 4,
+        elevation: 6,
+        backgroundColor: colorScheme.primary,
+        foregroundColor: colorScheme.onPrimary,
       ),
     );
   }
@@ -264,23 +346,32 @@ class _TodoHomePageState extends State<TodoHomePage> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(
-            Icons.task_alt,
-            size: 120,
-            color: colorScheme.primary.withOpacity(0.3),
-          ),
-          const SizedBox(height: 24),
-          Text(
-            'No tasks yet',
-            style: theme.textTheme.headlineSmall?.copyWith(
-              color: colorScheme.onSurface.withOpacity(0.6),
+          Container(
+            padding: const EdgeInsets.all(32),
+            decoration: BoxDecoration(
+              color: colorScheme.primaryContainer.withOpacity(0.3),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(
+              Icons.task_alt_rounded,
+              size: 80,
+              color: colorScheme.primary,
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 32),
           Text(
-            'Tap the + button to add your first task',
-            style: theme.textTheme.bodyMedium?.copyWith(
-              color: colorScheme.onSurface.withOpacity(0.4),
+            'No tasks yet',
+            style: theme.textTheme.headlineMedium?.copyWith(
+              fontWeight: FontWeight.bold,
+              color: colorScheme.onSurface,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Start by adding your first task\nand stay organized!',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.bodyLarge?.copyWith(
+              color: colorScheme.onSurface.withOpacity(0.6),
             ),
           ),
         ],
@@ -296,26 +387,30 @@ class _TodoHomePageState extends State<TodoHomePage> {
       padding: const EdgeInsets.all(16),
       children: [
         if (activeTasks.isNotEmpty) ...[
-          Text(
-            'Active Tasks',
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: colorScheme.primary,
-              fontWeight: FontWeight.bold,
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 12),
+            child: Text(
+              'Active Tasks',
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: colorScheme.primary,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-          const SizedBox(height: 8),
           ...activeTasks.map((task) => _buildTaskCard(theme, task, colorScheme)),
           const SizedBox(height: 24),
         ],
         if (completedTasks.isNotEmpty) ...[
-          Text(
-            'Completed',
-            style: theme.textTheme.titleMedium?.copyWith(
-              color: colorScheme.onSurface.withOpacity(0.6),
-              fontWeight: FontWeight.bold,
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 12),
+            child: Text(
+              'Completed',
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: colorScheme.onSurface.withOpacity(0.6),
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-          const SizedBox(height: 8),
           ...completedTasks.map((task) => _buildTaskCard(theme, task, colorScheme)),
         ],
       ],
@@ -323,46 +418,98 @@ class _TodoHomePageState extends State<TodoHomePage> {
   }
 
   Widget _buildTaskCard(ThemeData theme, Task task, ColorScheme colorScheme) {
-    return Card(
+    return Container(
       margin: const EdgeInsets.only(bottom: 12),
-      child: ListTile(
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        leading: Checkbox(
-          value: task.isCompleted,
-          onChanged: (_) => _toggleTaskCompletion(task),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(4)),
-        ),
-        title: Text(
-          task.title,
-          style: TextStyle(
-            decoration: task.isCompleted ? TextDecoration.lineThrough : null,
-            color: task.isCompleted
-                ? colorScheme.onSurface.withOpacity(0.5)
-                : colorScheme.onSurface,
+      decoration: BoxDecoration(
+        color: task.isCompleted 
+            ? colorScheme.surfaceContainerHighest.withOpacity(0.5)
+            : colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 2),
           ),
-        ),
-        subtitle: task.description.isNotEmpty
-            ? Text(
-                task.description,
-                style: TextStyle(
-                  color: colorScheme.onSurface.withOpacity(0.6),
+        ],
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(20),
+        onTap: () => _showEditTaskDialog(task),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: task.isCompleted 
+                      ? colorScheme.primary.withOpacity(0.1)
+                      : colorScheme.primaryContainer.withOpacity(0.3),
+                  borderRadius: BorderRadius.circular(12),
                 ),
-              )
-            : null,
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            IconButton(
-              icon: const Icon(Icons.edit_outlined),
-              onPressed: () => _showEditTaskDialog(task),
-              tooltip: 'Edit',
-            ),
-            IconButton(
-              icon: const Icon(Icons.delete_outline),
-              onPressed: () => _showDeleteConfirmation(task),
-              tooltip: 'Delete',
-            ),
-          ],
+                child: Checkbox(
+                  value: task.isCompleted,
+                  onChanged: (_) => _toggleTaskCompletion(task),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                  materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  visualDensity: VisualDensity.compact,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      task.title,
+                      style: theme.textTheme.titleMedium?.copyWith(
+                        decoration: task.isCompleted ? TextDecoration.lineThrough : null,
+                        color: task.isCompleted
+                            ? colorScheme.onSurface.withOpacity(0.5)
+                            : colorScheme.onSurface,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    if (task.description.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        task.description,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: colorScheme.onSurface.withOpacity(0.6),
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.edit_outlined,
+                      color: colorScheme.primary,
+                    ),
+                    onPressed: () => _showEditTaskDialog(task),
+                    tooltip: 'Edit',
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  IconButton(
+                    icon: Icon(
+                      Icons.delete_outline,
+                      color: colorScheme.error,
+                    ),
+                    onPressed: () => _showDeleteConfirmation(task),
+                    tooltip: 'Delete',
+                    visualDensity: VisualDensity.compact,
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
